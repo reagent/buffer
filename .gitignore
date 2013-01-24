@@ -1,0 +1,4 @@
+build
+src/*.o
+tests/*.log
+tests/*_tests

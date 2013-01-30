@@ -13,9 +13,6 @@ SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
 # The target build
 all: $(TARGET) $(SO_TARGET) tests
 
-dev: CFLAGS=-DNDEBUG -g -Wall -Isrc -Wextra $(OPTFLAGS)
-dev: all
-
 $(TARGET): CFLAGS += -fPIC
 $(TARGET): build $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
@@ -35,7 +32,7 @@ tests: $(TESTS)
 	sh ./tests/runtests.sh
 
 valgrind:
-	VALGRIND="valgrind --log-file=/tmp/valgrind-%p.log" $(MAKE)
+	VALGRIND="valgrind --leak-check=full --log-file=/tmp/valgrind-%p.log" $(MAKE)
 
 # The cleaner
 clean:

@@ -4,13 +4,21 @@
 Buffer *
 buffer_alloc(int initial_size)
 {
-    // TODO: handle memory allocation problems
-    Buffer *buf     = malloc(sizeof(Buffer));
-    buf->contents   = calloc(1, initial_size * sizeof(char));
+    Buffer *buf = malloc(sizeof(Buffer));
+    char   *tmp = calloc(1, initial_size * sizeof(char));
+
+    jump_to_error_if(buf == NULL || tmp == NULL);
+
+    buf->contents   = tmp;
     buf->bytes_used = 0;
     buf->total_size = initial_size;
 
     return buf;
+error:
+    if (buf) { buffer_free(buf); }
+    if (tmp) { free(tmp); }
+
+    return NULL;
 }
 
 int
@@ -98,12 +106,12 @@ buffer_appendf(Buffer *buf, const char *format, ...)
     va_start(argp, format);
 
     bytes_written = vasprintf(&tmp, format, argp);
-    jump_unless(bytes_written >= 0);
+    jump_to_error_if(bytes_written < 0);
 
     va_end(argp);
 
     status = buffer_append(buf, tmp, bytes_written);
-    jump_unless(status == 0);
+    jump_to_error_unless(status == 0);
 
     free(tmp);
 

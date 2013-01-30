@@ -2,7 +2,7 @@
 #include <buffer.h>
 
 int
-buffer_compare(Buffer *buf, char *comparison, int bytes)
+buffer_compare_full(Buffer *buf, char *comparison, int bytes)
 {
     int same = 1;
     int i = 0;
@@ -12,6 +12,12 @@ buffer_compare(Buffer *buf, char *comparison, int bytes)
     }
 
     return same;
+}
+
+int
+buffer_compare(Buffer *buf, char *comparison)
+{
+    return buffer_compare_full(buf, comparison, strlen(comparison) + 1);
 }
 
 char *
@@ -64,15 +70,14 @@ test_buffer_append()
     memset(&cmp, 0, cmp_size);
 
     cmp[0] = '\0';
-    mu_assert(buffer_compare(buf, cmp, 1) == 1, "Buffer should be empty.");
-
+    mu_assert(buffer_compare_full(buf, cmp, 1) == 1, "Buffer should be empty.");
 
     memset(&cmp, 0, cmp_size);
     buffer_append(buf, "A", 1);
 
     cmp[0] = 'A';
     cmp[1] = '\0';
-    mu_assert(buffer_compare(buf, cmp, 2) == 1, "Appending C-style string should work.");
+    mu_assert(buffer_compare_full(buf, cmp, 2) == 1, "Appending C-style string should work.");
 
     memset(&cmp, 0, cmp_size);
     cmp[0] = 'A';
@@ -80,7 +85,7 @@ test_buffer_append()
     cmp[2] = '\0';
 
     buffer_append(buf, "A", 3);
-    mu_assert(buffer_compare(buf, cmp, 3) == 1, "Appending C-style string stops at NUL.");
+    mu_assert(buffer_compare_full(buf, cmp, 3) == 1, "Appending C-style string stops at NUL.");
 
     memset(&cmp, 0, cmp_size);
     cmp[0] = 'A';
@@ -91,7 +96,23 @@ test_buffer_append()
     char no_nul[1] = {'B'};
 
     buffer_append(buf, no_nul, 1);
-    mu_assert(buffer_compare(buf, cmp, 4) == 1, "Appending string without NUL byte stops at specified length.")
+    mu_assert(buffer_compare_full(buf, cmp, 4) == 1, "Appending string without NUL byte stops at specified length.");
+
+    buffer_free(buf);
+
+    return NULL;
+}
+
+char *
+test_buffer_appendf()
+{
+    Buffer *buf = buffer_alloc(64);
+
+    buffer_appendf(buf, "%s, #%d", "Hello", 2);
+    mu_assert(buffer_compare(buf, "Hello, #2") == 1, "Printing interprets string and decimal characters");
+
+    buffer_appendf(buf, ". %s, #%d?", "Yes", 1);
+    mu_assert(buffer_compare(buf, "Hello, #2. Yes, #1?") == 1, "Printing appends to existing buffer");
 
     buffer_free(buf);
 
@@ -106,6 +127,7 @@ all_tests()
     mu_run_test(test_grow);
     mu_run_test(test_buffer_length);
     mu_run_test(test_buffer_append);
+    mu_run_test(test_buffer_appendf);
 
     return NULL;
 }

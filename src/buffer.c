@@ -87,3 +87,28 @@ buffer_append(Buffer *buf, char *append, int length)
 
     return 0;
 }
+
+int
+buffer_appendf(Buffer *buf, const char *format, ...)
+{
+    char *tmp = NULL;
+    int bytes_written, status;
+
+    va_list argp;
+    va_start(argp, format);
+
+    bytes_written = vasprintf(&tmp, format, argp);
+    jump_unless(bytes_written >= 0);
+
+    va_end(argp);
+
+    status = buffer_append(buf, tmp, bytes_written);
+    jump_unless(status == 0);
+
+    free(tmp);
+
+    return 0;
+error:
+    if (tmp != NULL) { free(tmp); }
+    return -1;
+}

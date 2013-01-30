@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <strings.h>
+#include <stdarg.h>
 
 struct Buffer {
     char *contents;
@@ -14,7 +15,8 @@ typedef struct Buffer Buffer;
 
 Buffer * buffer_alloc(int initial_size);
 int buffer_strlen(Buffer *buf);
-void buffer_free(Buffer *str);
-int buffer_append(Buffer *str, char *append, int length);
+void buffer_free(Buffer *buf);
+int buffer_append(Buffer *buf, char *append, int length);
+int buffer_appendf(Buffer *buf, const char *format, ...);
 
 #endif

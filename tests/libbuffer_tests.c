@@ -30,8 +30,11 @@ test_grow()
     buffer_append(buf, "A", 1);
     mu_assert(buf->total_size == 4, "Allocated size should grow to 4.");
 
-    buffer_append(buf, "BCD", 3);
-    mu_assert(buf->total_size == 8, "Allocated size should grow to 8.");
+    buffer_append(buf, "BC", 2);
+    mu_assert(buf->total_size == 4, "Does not grow when there is room.");
+
+    buffer_append(buf, "D", 1);
+    mu_assert(buf->total_size == 8, "Grows when out of space.");
 
     buffer_append(buf, "EFGH", 4);
     mu_assert(buf->total_size == 16, "Allocated size should grow to 16.");

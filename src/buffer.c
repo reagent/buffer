@@ -55,13 +55,17 @@ buffer_grow(Buffer *buf, int minimum_size)
 
     int new_size = factor * 2;
 
+    debug("Growing buffer from %d to %d bytes", buf->total_size, new_size);
+
     char *tmp = realloc(buf->contents, new_size * sizeof(char));
-    if (tmp == NULL) { return -1; }
+    jump_to_error_if(tmp == NULL);
 
     buf->contents   = tmp;
     buf->total_size = new_size;
 
     return 0;
+error:
+    return -1;
 }
 
 void
@@ -92,12 +96,14 @@ buffer_append(Buffer *buf, char *append, int length)
 
     if (!buffer_has_space(buf, desired_length)) {
         status = buffer_grow(buf, desired_length);
-        if (status == -1) { return -1; }
+        jump_to_error_unless(status == 0)
     }
 
     buffer_cat(buf, append, length);
 
     return 0;
+error:
+    return -1;
 }
 
 int

@@ -130,3 +130,42 @@ error:
     if (tmp != NULL) { free(tmp); }
     return -1;
 }
+
+int
+buffer_nappendf(Buffer *buf, size_t length, const char *format, ...)
+{
+    int status        = 0,
+        printf_length = length + 1;
+
+    char *tmp  = calloc(1, printf_length * sizeof(char));
+
+    jump_to_error_if(tmp == NULL);
+
+    va_list argp;
+    va_start(argp, format);
+
+    status = vsnprintf(tmp, printf_length, format, argp);
+    jump_to_error_if(status < 0);
+
+    va_end(argp);
+
+    status = buffer_append(buf, tmp, length);
+    jump_to_error_unless(status == 0);
+
+    free(tmp);
+
+    return 0;
+error:
+    if (tmp != NULL) { free(tmp); }
+    return -1;
+
+}
+
+char *
+buffer_to_s(Buffer *buf)
+{
+    char *result = calloc(1, buf->bytes_used + 1);
+    strncpy(result, buf->contents, buffer_strlen(buf));
+
+    return result;
+}

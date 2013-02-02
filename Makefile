@@ -9,17 +9,14 @@ TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,$(TEST_SRC))
 
 TARGET=build/libbuffer.a
-SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
+
 # The target build
-all: $(TARGET) $(SO_TARGET) tests
+all: $(TARGET) tests
 
 $(TARGET): CFLAGS += -fPIC
 $(TARGET): build $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
 	ranlib $@
-
-$(SO_TARGET): $(TARGET) $(OBJECTS)
-	$(CC) -shared -o $@ $(OBJECTS)
 
 build:
 	@mkdir -p build
